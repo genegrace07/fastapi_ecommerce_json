@@ -1,0 +1,6 @@
+#this files are not included
+.env
+.idea/
+data.csv
+data.json
+
