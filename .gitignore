@@ -4,4 +4,5 @@
 data.csv
 data.json
 users.json
+__pycache__/
 
