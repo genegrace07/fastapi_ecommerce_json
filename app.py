@@ -7,12 +7,13 @@ import os
 from model import Products,Users
 from datetime import datetime,timedelta
 from jose import jwt
+from verify import verify_token
 
 app = FastAPI()
 data = 'data.json'
 users = 'users.json'
 load_dotenv()
-ALGORITHM = os.getenv('algorith')
+ALGORITHM = os.getenv('algorithm')
 SECRET_KEY = os.getenv('secretkey')
 exp = 15
 def create_admin():
@@ -31,7 +32,7 @@ def create_admin():
 @app.on_event("startup")
 def startup_event():
     create_admin()
-@app.post('/login')
+@app.post('/login',include_in_schema=True)
 def user_login(credentials:OAuth2PasswordRequestForm=Depends()):
     username=credentials.username
     password=credentials.password
@@ -45,32 +46,22 @@ def user_login(credentials:OAuth2PasswordRequestForm=Depends()):
                 expire_time = datetime.utcnow() + timedelta(minutes=exp)
                 for_payload = {'id':if_match['id'],'username':if_match['username'],'exp':expire_time}
                 user_token = jwt.encode(for_payload,SECRET_KEY,algorithm=ALGORITHM)
-                return {'message':'login successfully','token':user_token}
-            return {'message':'password invalid'}
-        return {'message':'username invalid'}
+                return {'access_token':user_token,'token_type':'bearer'}
+            raise HTTPException(status_code=400,detail="wrong password")
+        raise HTTPException(status_code=404,detail="username not found")
     except FileNotFoundError:
         raise HTTPException(status_code=404,detail='json file not found')
     except json.JSONDecodeError:
         raise HTTPException(status_code=404,detail='invalid json file')
 @app.get('/')
-def view_products(credentials:OAuth2PasswordRequestForm=Depends()):
-    username = credentials.username
-    password = credentials.password
-    try:
-        with open(data,'r') as f:
-            view_list = json.load(f)
-        if credentials.username in view_list:
-            pwd_verified=sha256_crypt.verify(credentials.password,view_list['password'])
-            if credentials.password == pwd_verified:
-                return view_list
-            raise HTTPException(status_code=400,detail='invalid password')
-        raise HTTPException(status_code=400,detail='username not found')
-    except FileNotFoundError:
-        raise HTTPException(status_code=404,detail="json file not found")
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500,detail="json file invalid")
-
-'''
-login
-signup
-'''
+def view_products(payload_token:dict=Depends(verify_token)):
+    if payload_token:
+        try:
+            with open(data,'r') as f:
+                view_list = json.load(f)
+            return view_list
+        except FileNotFoundError:
+            raise HTTPException(status_code=404,detail="json file not found")
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500,detail="json file invalid")
+    raise HTTPException(status_code=403,detail="not found, no permission")
