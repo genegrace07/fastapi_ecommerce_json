@@ -1,5 +1,5 @@
 import json
-from fastapi import FastAPI,HTTPException,Depends
+from fastapi import FastAPI,HTTPException,Depends,Form
 from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer
 from dotenv import load_dotenv
 from passlib.hash import sha256_crypt
@@ -33,7 +33,7 @@ def create_admin():
 def startup_event():
     create_admin()
 @app.post('/login',include_in_schema=True)
-def user_login(credentials:OAuth2PasswordRequestForm=Depends()):
+async def user_login(credentials:OAuth2PasswordRequestForm=Depends()):
     username=credentials.username
     password=credentials.password
     try:
@@ -54,7 +54,7 @@ def user_login(credentials:OAuth2PasswordRequestForm=Depends()):
     except json.JSONDecodeError:
         raise HTTPException(status_code=404,detail='invalid json file')
 @app.get('/')
-def view_products(payload_token:dict=Depends(verify_token)):
+async def view_products(payload_token:dict=Depends(verify_token)):
     if payload_token:
         try:
             with open(data,'r') as f:
@@ -65,3 +65,30 @@ def view_products(payload_token:dict=Depends(verify_token)):
         except json.JSONDecodeError:
             raise HTTPException(status_code=500,detail="json file invalid")
     raise HTTPException(status_code=403,detail="not found, no permission")
+@app.post('/signup')
+def user_signup(username:str,password:str,payload_token:dict=Depends(verify_token)):
+    if payload_token['username'] == 'admin':
+        try:
+            users_list = []
+            with open(users,'r') as f:
+                users_list = json.load(f)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="json file not found")
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500, detail="json file invalid")
+
+        if_match = next((u for u in users_list if username == u['username']), None)
+        if if_match:
+            raise HTTPException(status_code=400,detail='username already used')
+        hash_pwd = sha256_crypt.hash(password)
+        new_user= {'id':len(users_list)+1,'username':username,'password':hash_pwd}
+        users_list.append(new_user)
+        with open(users,'w') as f:
+            json.dump(users_list,f,indent=4)
+        raise HTTPException(status_code=201,detail='user created successfully')
+    raise HTTPException(status_code=403,detail='No permission')
+
+'''
+update github
+next delete
+'''
