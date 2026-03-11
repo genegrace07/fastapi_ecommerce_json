@@ -25,7 +25,7 @@ def create_admin():
         if not if_have_default:
             password = os.getenv('admin_password')
             hashed_pwd = sha256_crypt.hash(password)
-            admin_login = {'id':1,'username':'admin','password':hashed_pwd}
+            admin_login = {'id':1,'username':'admin','password':hashed_pwd,'role':'admin'}
             user_list.append(admin_login)
             with open(users,'w') as f:
                 json.dump(user_list,f,indent=4)
@@ -44,7 +44,7 @@ async def user_login(credentials:OAuth2PasswordRequestForm=Depends()):
             verify_pwd=sha256_crypt.verify(credentials.password,if_match['password'])
             if verify_pwd:
                 expire_time = datetime.utcnow() + timedelta(minutes=exp)
-                for_payload = {'id':if_match['id'],'username':if_match['username'],'exp':expire_time}
+                for_payload = {'id':if_match['id'],'username':if_match['username'],'role':if_match['role'],'exp':expire_time}
                 user_token = jwt.encode(for_payload,SECRET_KEY,algorithm=ALGORITHM)
                 return {'access_token':user_token,'token_type':'bearer'}
             raise HTTPException(status_code=400,detail="wrong password")
@@ -66,8 +66,8 @@ async def view_products(payload_token:dict=Depends(verify_token)):
             raise HTTPException(status_code=500,detail="json file invalid")
     raise HTTPException(status_code=403,detail="not found, no permission")
 @app.post('/signup')
-def user_signup(username:str,password:str,payload_token:dict=Depends(verify_token)):
-    if payload_token['username'] == 'admin':
+async def user_signup(username:str=Form(...),password:str=Form(...),role:str=Form(...),payload_token:dict=Depends(verify_token)):
+    if payload_token['role'] == 'admin':
         try:
             users_list = []
             with open(users,'r') as f:
@@ -81,14 +81,49 @@ def user_signup(username:str,password:str,payload_token:dict=Depends(verify_toke
         if if_match:
             raise HTTPException(status_code=400,detail='username already used')
         hash_pwd = sha256_crypt.hash(password)
-        new_user= {'id':len(users_list)+1,'username':username,'password':hash_pwd}
-        users_list.append(new_user)
-        with open(users,'w') as f:
-            json.dump(users_list,f,indent=4)
-        raise HTTPException(status_code=201,detail='user created successfully')
+        if role in ['admin','user']:
+            new_user= {'id':len(users_list)+1,'username':username,'password':hash_pwd,'role':role}
+            users_list.append(new_user)
+            with open(users,'w') as f:
+                json.dump(users_list,f,indent=4)
+            return {'message':'user created successfully'}
+        return HTTPException(status_code=400,detail='role invalid')
     raise HTTPException(status_code=403,detail='No permission')
+@app.get('/view_users_list')
+async def users_view(payload_token:dict=Depends(verify_token)):
+    if payload_token['role'] == 'admin':
+        try:
+            with open(users,'r') as f:
+                users_lists = json.load(f)
+            return users_lists
+        except FileNotFoundError:
+            raise HTTPException(status_code=404,detail="json file not found")
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500,detail="json file invalid")
+    raise HTTPException(status_code=403,detail='no permission')
+@app.get('/update_user')
+async def update_user(payload_token:dict=Depends(verify_token)):
+    if payload_token['role'] == 'admin':
+        try:
+            with open(users,'r') as f:
+                users_list=json.load(f)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404,detail="json file not found")
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500,detail="json file invalid")
+        if_match = next((u for u in users_list if u['id']),None)
+
+    raise HTTPException(status_code=403,detail='no permission')
 
 '''
-update github
-next delete
+#read user list admin access
+Admin can change:username,password reset,role,delete account
+update user admin access
+delete user admin access
+admin access for create,read,update,delete product
+normal user access for create,read,update,delete product
+organize modules
+create cache for json
+hide hash password
+
 '''
