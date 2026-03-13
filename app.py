@@ -126,15 +126,24 @@ async def update_user(payload_token:dict=Depends(verify_token),id:int=Form(...),
             return {'message':'successfully update'}
         raise HTTPException(status_code=404,detail='not found')
     raise HTTPException(status_code=403,detail='no permission')
-@app.delete('/delete_user')
-async def user_delete(payload_token:dict=Depends(verify_token),id:int=Form(...)):
+@app.delete('/delete_user/{id}')
+async def user_delete(id:int,payload_token:dict=Depends(verify_token)):
     if payload_token['role'] == 'admin':
         users_list = []
-        with open(users,'r') as f:
-            users_list=json.load(f)
-        if_match = {u['id']:u for u in users_list}
-        if if_match[id]:
-            del if_match[id]
+        try:
+            with open(users,'r') as f:
+                users_list=json.load(f)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404,detail="json file not found")
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500,detail="json file invalid")
+        if_match = next((u for u in users_list if u['id'] == id),None)
+        if if_match:
+            if if_match['role'] == 'admin':
+                raise HTTPException(status_code=400,detail='cannot delete admin account, change to "user" role first')
+            users_list.remove(if_match)
+            with open(users,'w') as f:
+                json.dump(users_list,f,indent=4)
             return {'message':'user successfully deleted'}
         raise HTTPException(status_code=404,detail='not found')
     raise HTTPException(status_code=403,detail='no permission')
