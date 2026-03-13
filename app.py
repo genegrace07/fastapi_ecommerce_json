@@ -82,7 +82,8 @@ async def user_signup(username:str=Form(...),password:str=Form(...),role:str=For
             raise HTTPException(status_code=400,detail='username already used')
         hash_pwd = sha256_crypt.hash(password)
         if role in ['admin','user']:
-            new_user= {'id':len(users_list)+1,'username':username,'password':hash_pwd,'role':role}
+            new_id = max(u['id'] for u in users_list)+1 if users_list else 1
+            new_user= {'id':new_id,'username':username,'password':hash_pwd,'role':role}
             users_list.append(new_user)
             with open(users,'w') as f:
                 json.dump(users_list,f,indent=4)
@@ -152,8 +153,9 @@ async def user_delete(id:int,payload_token:dict=Depends(verify_token)):
 '''
 #read user list admin access
 #Admin can change users: username,password reset,role
+#Admin only can delete users
+#use max() for id
 
-Admin can delete users
 admin access for create,read,update,delete product
 normal user access for create,read,update,delete product
 -ADJUSTMENT-
@@ -161,6 +163,5 @@ organize modules
 create cache for json
 hide hash password
 hide hash password
-use max() for id
-separete admin endpoint for signup
+separate admin endpoint for signup
 '''
