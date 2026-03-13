@@ -101,9 +101,10 @@ async def users_view(payload_token:dict=Depends(verify_token)):
         except json.JSONDecodeError:
             raise HTTPException(status_code=500,detail="json file invalid")
     raise HTTPException(status_code=403,detail='no permission')
-@app.get('/update_user')
-async def update_user(payload_token:dict=Depends(verify_token)):
+@app.put('/update_user')
+async def update_user(payload_token:dict=Depends(verify_token),id:int=Form(...),username:str=Form(...),pwd:str=Form(...),role:str=Form(...)):
     if payload_token['role'] == 'admin':
+        users_list = []
         try:
             with open(users,'r') as f:
                 users_list=json.load(f)
@@ -111,19 +112,46 @@ async def update_user(payload_token:dict=Depends(verify_token)):
             raise HTTPException(status_code=404,detail="json file not found")
         except json.JSONDecodeError:
             raise HTTPException(status_code=500,detail="json file invalid")
-        if_match = next((u for u in users_list if u['id']),None)
-
+        if_match = next((u for u in users_list if u['id'] == id),None)
+        if if_match:
+            if_match['username']=username
+            hash_pwd = sha256_crypt.hash(pwd)
+            if_match['password']=hash_pwd
+            roles = ['admin','user']
+            if role not in roles:
+                raise HTTPException(status_code=400,detail='not valid role')
+            if_match['role'] = role
+            with open(users,'w') as f:
+                json.dump(users_list,f,indent=4)
+            return {'message':'successfully update'}
+        raise HTTPException(status_code=404,detail='not found')
     raise HTTPException(status_code=403,detail='no permission')
+@app.delete('/delete_user')
+async def user_delete(payload_token:dict=Depends(verify_token),id:int=Form(...)):
+    if payload_token['role'] == 'admin':
+        users_list = []
+        with open(users,'r') as f:
+            users_list=json.load(f)
+        if_match = {u['id']:u for u in users_list}
+        if if_match[id]:
+            del if_match[id]
+            return {'message':'user successfully deleted'}
+        raise HTTPException(status_code=404,detail='not found')
+    raise HTTPException(status_code=403,detail='no permission')
+
 
 '''
 #read user list admin access
-Admin can change:username,password reset,role,delete account
-update user admin access
-delete user admin access
+#Admin can change users: username,password reset,role
+
+Admin can delete users
 admin access for create,read,update,delete product
 normal user access for create,read,update,delete product
+-ADJUSTMENT-
 organize modules
 create cache for json
 hide hash password
-
+hide hash password
+use max() for id
+separete admin endpoint for signup
 '''
