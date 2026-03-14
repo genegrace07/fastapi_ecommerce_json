@@ -58,8 +58,8 @@ async def view_products(payload_token:dict=Depends(verify_token)):
     if payload_token:
         try:
             with open(data,'r') as f:
-                view_list = json.load(f)
-            return view_list
+                users_list = json.load(f)
+            return users_list
         except FileNotFoundError:
             raise HTTPException(status_code=404,detail="json file not found")
         except json.JSONDecodeError:
@@ -95,8 +95,9 @@ async def users_view(payload_token:dict=Depends(verify_token)):
     if payload_token['role'] == 'admin':
         try:
             with open(users,'r') as f:
-                users_lists = json.load(f)
-            return users_lists
+                users_list = json.load(f)
+            view_list = [{'id':u['id'],'username':u['username'],'role':u['role']} for u in users_list]
+            return view_list
         except FileNotFoundError:
             raise HTTPException(status_code=404,detail="json file not found")
         except json.JSONDecodeError:
@@ -157,11 +158,10 @@ async def user_delete(id:int,payload_token:dict=Depends(verify_token)):
 #use max() for id
 
 admin access for create,read,update,delete product
-normal user access for create,read,update,delete product
+normal user can create,read,update,delete order
 -ADJUSTMENT-
 organize modules
 create cache for json
-hide hash password
 hide hash password
 separate admin endpoint for signup
 '''
