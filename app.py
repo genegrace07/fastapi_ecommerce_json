@@ -156,12 +156,12 @@ async def user_delete(id:int,payload_token:dict=Depends(verify_token)):
 #Admin can change users: username,password reset,role
 #Admin only can delete users
 #use max() for id
+#hide hash password
 
 admin access for create,read,update,delete product
 normal user can create,read,update,delete order
 -ADJUSTMENT-
 organize modules
 create cache for json
-hide hash password
 separate admin endpoint for signup
 '''
