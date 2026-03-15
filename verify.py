@@ -5,7 +5,7 @@ from jose import jwt
 import os
 
 load_dotenv()
-bearer_scheme = OAuth2PasswordBearer(tokenUrl='/login')
+bearer_scheme = OAuth2PasswordBearer(tokenUrl='/users/login')
 ALGORITHM=os.getenv('algorithm')
 SECRET_KEY=os.getenv('secretkey')
 
