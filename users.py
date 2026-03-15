@@ -10,7 +10,9 @@ from jose import jwt
 from verify import verify_token
 from fastapi import APIRouter
 
-router = APIRouter(prefix='/users',tags=['Users'])
+user_router = APIRouter(prefix='/users',tags=['Users'])
+admin_router = APIRouter(prefix='/admin',tags=['Admin'])
+auth_router = APIRouter(prefix='/auth',tags=['Auth'])
 data = 'data.json'
 users = 'users.json'
 load_dotenv()
@@ -30,7 +32,7 @@ def create_admin():
             user_list.append(admin_login)
             with open(users,'w') as f:
                 json.dump(user_list,f,indent=4)
-@router.post('/login',include_in_schema=True)
+@auth_router.post('/login',include_in_schema=True)
 async def user_login(credentials:OAuth2PasswordRequestForm=Depends()):
     username=credentials.username
     password=credentials.password
@@ -51,7 +53,7 @@ async def user_login(credentials:OAuth2PasswordRequestForm=Depends()):
         raise HTTPException(status_code=404,detail='json file not found')
     except json.JSONDecodeError:
         raise HTTPException(status_code=404,detail='invalid json file')
-@router.post('/signup')
+@admin_router.post('/signup')
 async def user_signup(username:str=Form(...),password:str=Form(...),role:str=Form(...),payload_token:dict=Depends(verify_token)):
     if payload_token['role'] == 'admin':
         try:
@@ -74,9 +76,9 @@ async def user_signup(username:str=Form(...),password:str=Form(...),role:str=For
             with open(users,'w') as f:
                 json.dump(users_list,f,indent=4)
             return {'message':'user created successfully'}
-        return HTTPException(status_code=400,detail='role invalid')
+        raise HTTPException(status_code=400,detail='role invalid')
     raise HTTPException(status_code=403,detail='No permission')
-@router.get('/view_users_list')
+@admin_router.get('/view_users_list')
 async def users_view(payload_token:dict=Depends(verify_token)):
     if payload_token['role'] == 'admin':
         try:
@@ -89,7 +91,7 @@ async def users_view(payload_token:dict=Depends(verify_token)):
         except json.JSONDecodeError:
             raise HTTPException(status_code=500,detail="json file invalid")
     raise HTTPException(status_code=403,detail='no permission')
-@router.put('/update_user')
+@admin_router.put('/update_user')
 async def update_user(payload_token:dict=Depends(verify_token),id:int=Form(...),username:str=Form(...),pwd:str=Form(...),role:str=Form(...)):
     if payload_token['role'] == 'admin':
         users_list = []
@@ -114,7 +116,7 @@ async def update_user(payload_token:dict=Depends(verify_token),id:int=Form(...),
             return {'message':'successfully update'}
         raise HTTPException(status_code=404,detail='not found')
     raise HTTPException(status_code=403,detail='no permission')
-@router.delete('/delete_user/{id}')
+@admin_router.delete('/delete_user/{id}')
 async def user_delete(id:int,payload_token:dict=Depends(verify_token)):
     if payload_token['role'] == 'admin':
         users_list = []
