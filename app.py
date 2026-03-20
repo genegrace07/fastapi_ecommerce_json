@@ -20,9 +20,10 @@ def startup_event():
 #hide hash password
 #organize modules
 #separate admin endpoint for signup
+#create cache for json
 
 admin access for create,read,update,delete product
 normal user can create,read,update,delete order
 -ADJUSTMENT-
-create cache for json
+
 '''
