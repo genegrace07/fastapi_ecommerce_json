@@ -38,7 +38,8 @@ def save_user(update_user):
             users_cached=update_user
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="json file not found")
-
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="json file invalid")
 def save_product(update_product):
     global products_cached
     try:
@@ -47,3 +48,6 @@ def save_product(update_product):
             products_cached=update_product
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="json file not found")
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="json file invalid")
+

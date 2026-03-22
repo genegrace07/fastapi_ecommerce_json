@@ -1,5 +1,5 @@
 import json
-from fastapi import FastAPI,HTTPException,Depends,Form
+from fastapi import HTTPException,Depends,Form
 from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer
 from dotenv import load_dotenv
 from passlib.hash import sha256_crypt
@@ -91,7 +91,7 @@ async def user_delete(id:int,payload_token:dict=Depends(verify_token)):
     if payload_token['role'] == 'admin':
         if_match = next((u for u in user_cached if u['id'] == id),None)
         if if_match:
-            if if_match['role'] == 'admin':
+            if if_match['username'] == 'admin':
                 raise HTTPException(status_code=400,detail='cannot delete admin account, change to "user" role first')
             user_cached.remove(if_match)
             save_user(user_cached)

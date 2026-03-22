@@ -24,6 +24,4 @@ def startup_event():
 
 admin access for create,read,update,delete product
 normal user can create,read,update,delete order
--ADJUSTMENT-
-
 '''
