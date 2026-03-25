@@ -6,8 +6,13 @@ class Products(BaseModel):
     items:str
     price:int
     quantity:int
-
 class Users(BaseModel):
     user_id:int
     username:str
     password:str
+class Orders(BaseModel):
+    product_id:int
+    quantity:int
+    if_checkout:str
+
+

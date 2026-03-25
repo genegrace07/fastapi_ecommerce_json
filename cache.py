@@ -3,9 +3,11 @@ from fastapi import HTTPException
 
 users = 'users.json'
 data = 'data.json'
+ordered = 'order.json'
 
 users_cached = None
 products_cached = None
+order_cached = None
 
 def users_cache():
     global users_cached
@@ -50,4 +52,14 @@ def save_product(update_product):
         raise HTTPException(status_code=404, detail="json file not found")
     except json.JSONDecodeError:
         raise HTTPException(status_code=500, detail="json file invalid")
-
+def order_cache():
+    global order_cached
+    try:
+        if order_cached is None:
+            with open(ordered,'r') as f:
+                order_cached = json.load(f)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="json file not found")
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="json file invalid")
+    return order_cached
