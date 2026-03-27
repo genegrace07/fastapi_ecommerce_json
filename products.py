@@ -18,10 +18,10 @@ async def view_products(payload_token:dict=Depends(verify_token)):
 @router2.get('/view_order')
 async def view_orders(payload_token:dict=Depends(verify_token)):
     if payload_token:
-        orders_cached = order_cache()
-        if not orders_cached:
+        ordered = order_list()
+        if not ordered:
             return {'message':'no orders'}
-        ordered = {o for o in orders_cached if o['user_id'] == payload_token['id']}
+        # ordered = {o for o in orders_cached if o['user_id'] == payload_token['id']}
         return ordered
 @router2.post('/request_order')
 async def get_orders(order:order_request,payload_token:dict=Depends(verify_token)):
@@ -30,7 +30,6 @@ async def get_orders(order:order_request,payload_token:dict=Depends(verify_token
         cache_order = order_cache()
         order_id = order.product_id
         quantity = order.quantity
-        if_checkout = order.if_checkout
         if_match = next((c for c in cached if c['id'] == order_id),None)
         existing_order = [c for c in cache_order]
         total = quantity * if_match['price']
@@ -41,11 +40,36 @@ async def get_orders(order:order_request,payload_token:dict=Depends(verify_token
             "price": if_match['price'],
             "quantity": quantity
         }],"total_price":total}
-        if if_checkout == 'yes':
-            save_orders(cache_order)
-            cache_order.clear()
-            return {'message': 'order completed'}
+
         cache_order.append(new_order)
-        # print(cache_order)
+        save_orders(cache_order)
         return {'message': 'order added'}
     raise HTTPException(status_code=401,detail='invalid token')
+@router2.put('/update_order')
+async def order_update(order:order_request,payload_token:dict=Depends(verify_token)):
+    product_id = order.product_id
+    quantity = order.quantity
+    if not payload_token:
+        raise HTTPException(status_code=401,detail='invalid token')
+    ordered_list = order_list()
+    if_match = next((o1 for o in ordered_list for o1 in o['items'] if product_id == o1['product_id']),None)
+    if not if_match:
+        raise HTTPException(status_code=404,detail='product id not found')
+    if_match['quantity'] = quantity
+    save_orders(ordered_list)
+    return {'message':'successfully updated'}
+
+'''  {
+        "order_id": 2,
+        "user_id": 8,
+        "items": [
+            {
+                "product_id": 5,
+                "name": "Orange Choco",
+                "price": 8463,
+                "quantity": 30
+            }
+        ],
+        "total_price": 253890
+    }'''
+

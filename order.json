@@ -1,3 +1,41 @@
 [
-
+    {
+        "order_id": 1,
+        "user_id": 8,
+        "items": [
+            {
+                "product_id": 2,
+                "name": "Organic Choco Syrup",
+                "price": 798,
+                "quantity": 50
+            }
+        ],
+        "total_price": 39900
+    },
+    {
+        "order_id": 2,
+        "user_id": 8,
+        "items": [
+            {
+                "product_id": 5,
+                "name": "Orange Choco",
+                "price": 8463,
+                "quantity": 100
+            }
+        ],
+        "total_price": 253890
+    },
+    {
+        "order_id": 3,
+        "user_id": 8,
+        "items": [
+            {
+                "product_id": 7,
+                "name": "Choco Coated Almonds",
+                "price": 6706,
+                "quantity": 100
+            }
+        ],
+        "total_price": 134120
+    }
 ]

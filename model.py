@@ -13,6 +13,6 @@ class Users(BaseModel):
 class Orders(BaseModel):
     product_id:int
     quantity:int
-    if_checkout:str
+
 
 
