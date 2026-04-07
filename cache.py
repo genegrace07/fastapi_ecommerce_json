@@ -7,9 +7,8 @@ ordered = 'order.json'
 
 users_cached = None
 products_cached = None
-order_cached = None
 
-def users_cache():
+def users_cache(): #cache users list
     global users_cached
     if users_cached is None:
         try:
@@ -20,7 +19,7 @@ def users_cache():
         except json.JSONDecodeError:
             raise HTTPException(status_code=500, detail="json file invalid")
     return users_cached
-def products_cache():
+def products_cache(): #cache product list
     global products_cached
     if products_cached is None:
         try:
@@ -32,7 +31,7 @@ def products_cache():
             raise HTTPException(status_code=500, detail="json file invalid")
     return products_cached
 
-def save_user(update_user):
+def save_user(update_user): #update user by admin role
     global users_cached
     try:
         with open(users, 'w') as f:
@@ -42,7 +41,7 @@ def save_user(update_user):
         raise HTTPException(status_code=404, detail="json file not found")
     except json.JSONDecodeError:
         raise HTTPException(status_code=500, detail="json file invalid")
-def save_product(update_product):
+def save_product(update_product): #update product by admin role
     global products_cached
     try:
         with open(data, 'w') as f:
@@ -52,15 +51,5 @@ def save_product(update_product):
         raise HTTPException(status_code=404, detail="json file not found")
     except json.JSONDecodeError:
         raise HTTPException(status_code=500, detail="json file invalid")
-def order_cache():
-    global order_cached
-    try:
-        if order_cached is None:
-            with open(ordered,'r') as f:
-                order_cached = json.load(f)
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="json file not found")
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="json file invalid")
-    return order_cached
+
 

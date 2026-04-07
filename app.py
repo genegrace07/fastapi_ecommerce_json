@@ -12,6 +12,7 @@ app.include_router(order_router)
 def startup_event():
     create_admin()
 
+
 '''
 #read user list admin access
 #Admin can change users: username,password reset,role
@@ -22,7 +23,8 @@ def startup_event():
 #separate admin endpoint for signup
 #create cache for json
 
-ONGOING > UPDATING ORDER
-normal user can #create,#read,update,delete order
+normal user can #create,#read,#update,delete order
 admin access for create,read,update,delete product
+
+ONGOING > no duplicate product id,append new order under items,compute order, logged user can see only their order not the others?
 '''

@@ -34,9 +34,9 @@ async def user_login(credentials:OAuth2PasswordRequestForm=Depends()):
     user_cached = users_cache()
     username=credentials.username
     password=credentials.password
-    if_match=next((u for u in user_cached if credentials.username == u['username']),None)
+    if_match=next((u for u in user_cached if username == u['username']),None)
     if if_match:
-        verify_pwd=sha256_crypt.verify(credentials.password,if_match['password'])
+        verify_pwd=sha256_crypt.verify(password,if_match['password'])
         if verify_pwd:
             expire_time = datetime.utcnow() + timedelta(minutes=exp)
             for_payload = {'id':if_match['id'],'username':if_match['username'],'role':if_match['role'],'exp':expire_time}

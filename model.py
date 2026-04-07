@@ -11,8 +11,10 @@ class Users(BaseModel):
     username:str
     password:str
 class Orders(BaseModel):
+    # order_id:int
     product_id:int
     quantity:int
+    # product_id:int
 
 
 

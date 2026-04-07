@@ -4,38 +4,33 @@
         "user_id": 8,
         "items": [
             {
-                "product_id": 2,
-                "name": "Organic Choco Syrup",
-                "price": 798,
-                "quantity": 50
-            }
-        ],
-        "total_price": 39900
-    },
-    {
-        "order_id": 2,
-        "user_id": 8,
-        "items": [
+                "product_id": 19,
+                "name": "Almond Choco",
+                "price": 938,
+                "quantity": 7,
+                "total": 4690
+            },
             {
-                "product_id": 5,
-                "name": "Orange Choco",
-                "price": 8463,
-                "quantity": 100
-            }
-        ],
-        "total_price": 253890
-    },
-    {
-        "order_id": 3,
-        "user_id": 8,
-        "items": [
+                "product_id": 12,
+                "name": "White Choc",
+                "price": 2100,
+                "quantity": 5,
+                "total": 10500
+            },
             {
-                "product_id": 7,
-                "name": "Choco Coated Almonds",
-                "price": 6706,
-                "quantity": 100
+                "product_id": 13,
+                "name": "Mint Chip Choco",
+                "price": 1904,
+                "quantity": 3,
+                "total": 5712
+            },
+            {
+                "product_id": 21,
+                "name": "Manuka Honey Choco",
+                "price": 4480,
+                "quantity": 21,
+                "total": 94080
             }
-        ],
-        "total_price": 134120
+        ]
     }
 ]
