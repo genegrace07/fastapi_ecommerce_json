@@ -33,24 +33,31 @@ async def get_orders(order:order_request,payload_token:dict=Depends(verify_token
         quantity = order.quantity
         orders = ordered
 
-        # match_product_id = [o['product_id'] for o in orders[0]['items'] ]
-        match_product_id = next((o['product_id'] for o in orders[0]['items'] if product_id == o['product_id'] ),None)
         if_match = next((c for c in cached if c['id'] == product_id),None)
-        if not if_match:
-            raise HTTPException(status_code=404,detail='product id not found')
+        grand_total = 0
         total = quantity * if_match['price']
+        grand_total += total
+
         if len(orders) == 0:
+
             new_item = {"product_id": if_match['id'], "name": if_match['items'], "price": if_match['price'],
                         "quantity": quantity, "total": total}
-            new_order = {"order_id": len(ordered) + 1, "user_id": payload_token['id'], "items": []}
+            new_order = {"order_id": len(ordered) + 1, "user_id": payload_token['id'], "items": [], "grand_total":grand_total}
             new_order['items'].append(new_item)
             orders.append(new_order)
             save_orders(orders)
             return {'message': 'order added'}
+
+        match_product_id = next((o['product_id'] for o in orders[0]['items'] if product_id == o['product_id'] ),None)
+        if not if_match:
+            raise HTTPException(status_code=404,detail='product id not found')
+
+
         if product_id == match_product_id:
             return {'message': 'item already been added, go to update product'}
         new_item = {"product_id": if_match['id'], "name": if_match['items'], "price": if_match['price'],
                     "quantity": quantity, "total": total}
+        grand_total += orders[0]['items'][0]['total']
         orders[0]['items'].append(new_item)
         save_orders(orders)
         return {'message': 'order added'}
@@ -62,13 +69,16 @@ async def order_update(order:order_request,payload_token:dict=Depends(verify_tok
     if not payload_token:
         raise HTTPException(status_code=401,detail='invalid token')
     ordered_list = order_list()
-    order,item = next(((o,i) for o in ordered_list if order_id == o['order_id'] for i in o['items']), (None,None))
+    order,item = next(((o,i) for o in ordered_list for i in o['items'] if i['product_id'] == product_id), (None,None))
     if not item:
-        raise HTTPException(status_code=404,detail='order id not found')
+        raise HTTPException(status_code=404,detail='product id not found')
+    total = 0
     item['quantity'] = quantity
-    sub_total = item['quantity'] * item['price']
-    order['total_price'] = sub_total
+    sub_total = quantity * item['price']
+    item['total'] = sub_total
+    total += item['total']
+    print(total)
     save_orders(ordered_list)
     return {'message':'successfully updated'}
 
-
+#TO BE CONTINUE: GRAND TOTAL
