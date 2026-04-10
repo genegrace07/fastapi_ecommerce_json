@@ -28,13 +28,16 @@ def save_orders(ordered):
         raise HTTPException(status_code=500, detail='json file is invalid')
 def total_order():
     try:
-        if os.path.getsize(orders) == 0:
-            return {'message':'no order'}
         with open(orders,'r') as f:
             order_list = json.load(f)
-        total = [o['total_price'] for o in order_list]
+        if not order_list:
+            return 0
+        total = [o['total'] for o in order_list[0]['items']]
+        if not total:
+            return 0
         grand_total = sum(total)
-        return
+        return grand_total
+
     except FileNotFoundError:
         raise HTTPException(status_code=404,detail='json file not found')
     except json.JSONDecodeError:

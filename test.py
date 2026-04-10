@@ -1,11 +1,22 @@
 import json
 
-users = 'users.json'
+orders = 'order.json'
 
-users_cached={}
+try:
+    with open(orders,'r') as f:
+        view_total = json.load(f)
+    view_list = [v['total'] for v in view_total[0]['items']]
+    print(view_list)
+    print(sum(view_list))
+except:
+    print('empty order')
 
-def users_cache():
-        with open(users,'r') as f:
-            users_cached = json.load(f)
-        print(users_cached)
-users_cache()
+# orders = 'order.json'
+#
+# with open(orders,'r') as f:
+#     view_total = json.load(f)
+#
+# grand_total = [v for v in view_total[0]['grand_total']]
+#
+# print(grand_total)
+
