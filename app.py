@@ -26,5 +26,5 @@ def startup_event():
 normal user can #create,#read,#update,delete order
 admin access for create,read,update,delete product
 
-ONGOING > no duplicate product id,append new order under items,compute order, logged user can see only their order not the others?
+ONGOING > logged user can see only their order not the others?
 '''

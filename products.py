@@ -67,26 +67,24 @@ async def order_update(order:order_request,payload_token:dict=Depends(verify_tok
     quantity = order.quantity
     product_id = order.product_id
     cached = products_cache()
-
-    if_match = next((c for c in cached if c['id'] == product_id), None)
-    grand_total = 0
-    total = quantity * if_match['price']
-
+    grand_total = total_order()
+    # if_match = next((c for c in cached if c['id'] == product_id), None)
     if not payload_token:
         raise HTTPException(status_code=401,detail='invalid token')
     ordered_list = order_list()
-    order,item = next(((o,i) for o in ordered_list for i in o['items'] if i['product_id'] == product_id), (None,None))
+    order1,item = next(((o,i) for o in ordered_list for i in o['items'] if i['product_id'] == product_id), (None,None))
     if not item:
         raise HTTPException(status_code=404,detail='product id not found')
-    total = 0
+    new_total = item['price'] * quantity
     item['quantity'] = quantity
-    sub_total = quantity * item['price']
-    item['total'] = sub_total
-    total += item['total']
-    grand_total += total
-    print(grand_total)
+    item['total'] = new_total
+    get_total = [o['total'] for o in order1['items']]
+    order1['grand_total'] = sum(get_total)
+    # print(sum(get_total))
     save_orders(ordered_list)
     return {'message':'successfully updated'}
 
-#TO BE CONTINUE: GRAND TOTAL DUPLICATE ENTRY
+#TO BE CONTINUE: WRONG GRAND TOTAL AFTER UPDATING, OLD TOTAL ADDED
+
+
 
