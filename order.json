@@ -23,8 +23,22 @@
                 "price": 6706,
                 "quantity": 459,
                 "total": 3078054
+            },
+            {
+                "product_id": 22,
+                "name": "Smooth Sliky Salty",
+                "price": 4326,
+                "quantity": 100,
+                "total": 432600
+            },
+            {
+                "product_id": 31,
+                "name": "Caramel Stuffed Bars",
+                "price": 854,
+                "quantity": 10,
+                "total": 8540
             }
         ],
-        "grand_total": 7734132
+        "grand_total": 8175272
     }
 ]

@@ -50,7 +50,8 @@ async def get_orders(order:order_request,payload_token:dict=Depends(verify_token
             return {'message': 'order added'}
 
         match_product_id = next((o['product_id'] for o in orders[0]['items'] if product_id == o['product_id'] ),None)
-
+        if_match_order = next((o for o in ordered if o['user_id'] == payload_token['id']),None)
+        if_match_item = next((i for i in if_match_order['items'] if product_id == i['product_id']),None)
         if product_id == match_product_id:
             return {'message': 'item already been added, go to update product'}
         if quantity == 0:
@@ -61,8 +62,11 @@ async def get_orders(order:order_request,payload_token:dict=Depends(verify_token
         new_item = {"product_id": if_match['id'], "name": if_match['items'], "price": if_match['price'],
                     "quantity": quantity, "total": total}
         final_total = grand_total + total
-        orders[0]['grand_total'] = final_total
-        orders[0]['items'].append(new_item)
+        if_match_order['grand_total'] = final_total
+        if_match_order['items'].append(new_item)
+        # final_total = grand_total + total
+        # orders[0]['grand_total'] = final_total
+        # orders[0]['items'].append(new_item)
         save_orders(orders)
         return {'message': 'order added'}
     raise HTTPException(status_code=401,detail='invalid token')
