@@ -22,8 +22,9 @@ def startup_event():
 #organize modules
 #separate admin endpoint for signup
 #create cache for json
+#normal user can #create,#read,#update,#delete order
 
-normal user can #create,#read,#update,#delete order
 admin access for create,read,update,delete product
+checkout
 
 '''

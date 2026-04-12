@@ -7,17 +7,24 @@
                 "product_id": 11,
                 "name": "Peanut Butter Cubes",
                 "price": 8869,
-                "quantity": 10,
-                "total": 88690
+                "quantity": 432,
+                "total": 3831408
             },
             {
                 "product_id": 6,
                 "name": "White Choc",
                 "price": 1785,
-                "quantity": 10,
-                "total": 17850
+                "quantity": 462,
+                "total": 824670
+            },
+            {
+                "product_id": 7,
+                "name": "Choco Coated Almonds",
+                "price": 6706,
+                "quantity": 459,
+                "total": 3078054
             }
         ],
-        "grand_total": 106540
+        "grand_total": 7734132
     }
 ]

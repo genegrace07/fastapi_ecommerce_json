@@ -53,6 +53,8 @@ async def get_orders(order:order_request,payload_token:dict=Depends(verify_token
 
         if product_id == match_product_id:
             return {'message': 'item already been added, go to update product'}
+        if quantity > if_match['quantity']:
+            raise HTTPException(status_code=400,detail='insufficient stock, quantity not greater than stock')
         total = quantity * if_match['price']
         new_item = {"product_id": if_match['id'], "name": if_match['items'], "price": if_match['price'],
                     "quantity": quantity, "total": total}
@@ -71,16 +73,18 @@ async def order_update(order:order_request,payload_token:dict=Depends(verify_tok
 
     if not payload_token:
         raise HTTPException(status_code=401,detail='invalid token')
+    if_match_id = next((c for c in cached if product_id == c['id']),None)
     ordered_list = order_list()
     order1,item = next(((o,i) for o in ordered_list for i in o['items'] if i['product_id'] == product_id), (None,None))
     if not item:
         raise HTTPException(status_code=404,detail='product id not found')
+    if quantity > if_match_id['quantity']:
+        raise HTTPException(status_code=400,detail='insufficient stock, quantity not greater than stock')
     new_total = item['price'] * quantity
     item['quantity'] = quantity
     item['total'] = new_total
     get_total = [o['total'] for o in order1['items']]
     order1['grand_total'] = sum(get_total)
-    # print(sum(get_total))
     save_orders(ordered_list)
     return {'message':'successfully updated'}
 @router2.delete('/delete_order/{product_id}')
@@ -101,6 +105,7 @@ async def order_delete(product_id:int,payload_token:dict=Depends(verify_token)):
     return {'message':'order deleted'}
 
 #TO BE CONTINUE: AFTER ORDER DELETED,UPDATE GRAND TOTAL, QUANTITY CANNOT BE 0, CANNOT BE EXCEED TO CURRENTLY QUANTITY
+#FIX [0] QUERRY
 
 
 
