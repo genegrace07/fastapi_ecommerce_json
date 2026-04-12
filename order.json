@@ -4,11 +4,11 @@
         "user_id": 8,
         "items": [
             {
-                "product_id": 3,
-                "name": "Milk Bars",
-                "price": 819,
-                "quantity": 40,
-                "total": 32760
+                "product_id": 11,
+                "name": "Peanut Butter Cubes",
+                "price": 8869,
+                "quantity": 10,
+                "total": 88690
             },
             {
                 "product_id": 6,
@@ -16,15 +16,8 @@
                 "price": 1785,
                 "quantity": 10,
                 "total": 17850
-            },
-            {
-                "product_id": 8,
-                "name": "Caramel Stuffed Bars",
-                "price": 3556,
-                "quantity": 10,
-                "total": 35560
             }
         ],
-        "grand_total": 86170
+        "grand_total": 106540
     }
 ]

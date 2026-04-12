@@ -35,6 +35,9 @@ async def get_orders(order:order_request,payload_token:dict=Depends(verify_token
         if_match = next((c for c in cached if c['id'] == product_id),None)
         grand_total = total_order()
 
+        if not if_match:
+            raise HTTPException(status_code=404,detail='product id not found')
+
         if len(orders) == 0:
             total = quantity * if_match['price']
             new_item = {"product_id": if_match['id'], "name": if_match['items'], "price": if_match['price'],
@@ -47,8 +50,6 @@ async def get_orders(order:order_request,payload_token:dict=Depends(verify_token
             return {'message': 'order added'}
 
         match_product_id = next((o['product_id'] for o in orders[0]['items'] if product_id == o['product_id'] ),None)
-        if not if_match:
-            raise HTTPException(status_code=404,detail='product id not found')
 
         if product_id == match_product_id:
             return {'message': 'item already been added, go to update product'}
@@ -59,7 +60,6 @@ async def get_orders(order:order_request,payload_token:dict=Depends(verify_token
         orders[0]['grand_total'] = final_total
         orders[0]['items'].append(new_item)
         save_orders(orders)
-        # print(grand_total+total) #FOR CHECK THE GRAND TOTAL
         return {'message': 'order added'}
     raise HTTPException(status_code=401,detail='invalid token')
 @router2.put('/update_order')
@@ -68,7 +68,7 @@ async def order_update(order:order_request,payload_token:dict=Depends(verify_tok
     product_id = order.product_id
     cached = products_cache()
     grand_total = total_order()
-    # if_match = next((c for c in cached if c['id'] == product_id), None)
+
     if not payload_token:
         raise HTTPException(status_code=401,detail='invalid token')
     ordered_list = order_list()
@@ -83,8 +83,29 @@ async def order_update(order:order_request,payload_token:dict=Depends(verify_tok
     # print(sum(get_total))
     save_orders(ordered_list)
     return {'message':'successfully updated'}
+@router2.delete('/delete_order/{product_id}')
+async def order_delete(product_id:int,payload_token:dict=Depends(verify_token)):
+    if not payload_token:
+        raise HTTPException(status_code=401,detail='invalid token')
+    ordered = order_list()
+    if_match_order = next((o for o in ordered if o['user_id'] == payload_token['id']),None)
+    if_match_item = next((i for i in if_match_order['items'] if product_id == i['product_id']),None)
+    if not if_match_order:
+        raise HTTPException(status_code=404,detail='user id not found')
+    if not if_match_item:
+        raise HTTPException(status_code=404,detail='product id not found')
+    new_grand_total = if_match_order['grand_total'] - if_match_item['total']
+    if_match_order['grand_total'] = new_grand_total
+    if_match_order['items'].remove(if_match_item)
+    save_orders(ordered)
+    return {'message':'order deleted'}
 
-#TO BE CONTINUE: WRONG GRAND TOTAL AFTER UPDATING, OLD TOTAL ADDED
+#TO BE CONTINUE: AFTER ORDER DELETED,UPDATE GRAND TOTAL, QUANTITY CANNOT BE 0, CANNOT BE EXCEED TO CURRENTLY QUANTITY
+
+
+
+
+
 
 
 

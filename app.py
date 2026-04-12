@@ -23,8 +23,7 @@ def startup_event():
 #separate admin endpoint for signup
 #create cache for json
 
-normal user can #create,#read,#update,delete order
+normal user can #create,#read,#update,#delete order
 admin access for create,read,update,delete product
 
-ONGOING > logged user can see only their order not the others?
 '''
