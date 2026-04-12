@@ -53,6 +53,8 @@ async def get_orders(order:order_request,payload_token:dict=Depends(verify_token
 
         if product_id == match_product_id:
             return {'message': 'item already been added, go to update product'}
+        if quantity == 0:
+            raise HTTPException(status_code=400,detail='quantity cannot be zero')
         if quantity > if_match['quantity']:
             raise HTTPException(status_code=400,detail='insufficient stock, quantity not greater than stock')
         total = quantity * if_match['price']
@@ -78,6 +80,8 @@ async def order_update(order:order_request,payload_token:dict=Depends(verify_tok
     order1,item = next(((o,i) for o in ordered_list for i in o['items'] if i['product_id'] == product_id), (None,None))
     if not item:
         raise HTTPException(status_code=404,detail='product id not found')
+    if quantity == 0:
+        raise HTTPException(status_code=400, detail='quantity cannot be zero')
     if quantity > if_match_id['quantity']:
         raise HTTPException(status_code=400,detail='insufficient stock, quantity not greater than stock')
     new_total = item['price'] * quantity
@@ -104,8 +108,7 @@ async def order_delete(product_id:int,payload_token:dict=Depends(verify_token)):
     save_orders(ordered)
     return {'message':'order deleted'}
 
-#TO BE CONTINUE: AFTER ORDER DELETED,UPDATE GRAND TOTAL, QUANTITY CANNOT BE 0, CANNOT BE EXCEED TO CURRENTLY QUANTITY
-#FIX [0] QUERRY
+#TO BE CONTINUE: FIX [0] QUERRY
 
 
 
