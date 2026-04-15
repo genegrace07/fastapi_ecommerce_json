@@ -15,6 +15,8 @@ class Orders(BaseModel):
     product_id:int
     quantity:int
     # product_id:int
+class RequestCheckout(BaseModel):
+    confirm:bool
 
 
 

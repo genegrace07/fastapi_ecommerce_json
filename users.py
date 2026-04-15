@@ -44,7 +44,6 @@ async def user_login(credentials:OAuth2PasswordRequestForm=Depends()):
             return {'access_token':user_token,'token_type':'bearer'}
         raise HTTPException(status_code=400,detail="wrong password")
     raise HTTPException(status_code=404,detail="username not found")
-
 @admin_router.post('/signup')
 async def user_signup(username:str=Form(...),password:str=Form(...),role:str=Form(...),payload_token:dict=Depends(verify_token)):
     user_cached = users_cache()

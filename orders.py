@@ -3,10 +3,7 @@ import json
 import os
 
 orders = 'order.json'
-# def if_blank_order():
-#     put_this = []
-#     with open(orders,'w') as f:
-#         json.dump(put_this,f,indent=4)
+order_history = 'order_history.json'
 def order_list():
     try:
         with open(orders,'r') as f:
@@ -42,5 +39,13 @@ def total_order():
         raise HTTPException(status_code=404,detail='json file not found')
     except json.JSONDecodeError:
         raise HTTPException(status_code=400,detail='invalid json file')
+def orders_history(ordered):
+    try:
+        with open(order_history,'w') as f:
+            json.dump(ordered,f,indent=4)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail='json file not found')
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail='invalid json file')
 
 

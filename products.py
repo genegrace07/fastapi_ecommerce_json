@@ -2,13 +2,15 @@ from fastapi import APIRouter,Depends,HTTPException
 from verify import verify_token
 import json
 from cache import products_cache
-from orders import order_list,save_orders,total_order
-from model import Orders as order_request
+from orders import order_list,save_orders,total_order,orders_history
+from model import Orders as order_request,RequestCheckout
 import os
+from datetime import datetime
 
 router = APIRouter(prefix='/products',tags=['Products'])
 router2 = APIRouter(prefix='/orders',tags=['orders'])
 data = 'data.json'
+order_history = 'order_history.json'
 
 @router.get('/')
 async def view_products(payload_token:dict=Depends(verify_token)):
@@ -111,8 +113,30 @@ async def order_delete(product_id:int,payload_token:dict=Depends(verify_token)):
     if_match_order['items'].remove(if_match_item)
     save_orders(ordered)
     return {'message':'order deleted'}
+@router2.put('/checkout')
+async def checkout_order(order:RequestCheckout,payload_token:dict=Depends(verify_token)):
+    if not payload_token:
+        raise HTTPException(status_code=401,detail='invalid token')
+    if not order.confirm:
+        return {'message':'please confirm to checkout'}
+    ordered_list = order_list()
+    order_history_list = []
+    if_match = next((o for o in ordered_list if payload_token['id'] == o['user_id']),None)
+    # ordered_history = [o for o in order_history]
+    # get_item = next((i for i in if_match['items']),None)
 
-#TO BE CONTINUE: FIX [0] QUERRY
+    if not if_match:
+        raise HTTPException(status_code=404,detail='user id not found')
+    # add_transaction_date = [v for v in ordered_list if payload_token['id'] == v['user_id']]
+    date_now = datetime.utcnow().isoformat()
+    add_order_to_history = {"order_id": if_match['order_id'], "user_id": if_match['user_id'], "items": if_match['items'],"grand_total":if_match['grand_total'],"transaction_date":date_now}
+    order_history_list.append(add_order_to_history)
+    orders_history(order_history_list)
+    return {'message': 'order checkout'}
+
+#TO BE CONTINUE: after checkout, clear user id order on order.py, users order only
+
+
 
 
 
