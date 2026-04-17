@@ -3,7 +3,7 @@ from verify import verify_token
 import json
 from cache import products_cache
 from orders import order_list,save_orders,total_order,orders_history
-from model import Orders as order_request,RequestCheckout
+from model import Orders as order_request,RequestCheckout,Users
 import os
 from datetime import datetime
 
@@ -66,9 +66,6 @@ async def get_orders(order:order_request,payload_token:dict=Depends(verify_token
         final_total = grand_total + total
         if_match_order['grand_total'] = final_total
         if_match_order['items'].append(new_item)
-        # final_total = grand_total + total
-        # orders[0]['grand_total'] = final_total
-        # orders[0]['items'].append(new_item)
         save_orders(orders)
         return {'message': 'order added'}
     raise HTTPException(status_code=401,detail='invalid token')
@@ -122,19 +119,17 @@ async def checkout_order(order:RequestCheckout,payload_token:dict=Depends(verify
     ordered_list = order_list()
     order_history_list = []
     if_match = next((o for o in ordered_list if payload_token['id'] == o['user_id']),None)
-    # ordered_history = [o for o in order_history]
-    # get_item = next((i for i in if_match['items']),None)
 
     if not if_match:
         raise HTTPException(status_code=404,detail='user id not found')
-    # add_transaction_date = [v for v in ordered_list if payload_token['id'] == v['user_id']]
     date_now = datetime.utcnow().isoformat()
     add_order_to_history = {"order_id": if_match['order_id'], "user_id": if_match['user_id'], "items": if_match['items'],"grand_total":if_match['grand_total'],"transaction_date":date_now}
     order_history_list.append(add_order_to_history)
+    ordered_list = []
+    save_orders(ordered_list)
     orders_history(order_history_list)
     return {'message': 'order checkout'}
 
-#TO BE CONTINUE: after checkout, clear user id order on order.py, users order only
 
 
 

@@ -23,8 +23,7 @@ def startup_event():
 #separate admin endpoint for signup
 #create cache for json
 #normal user can #create,#read,#update,#delete order
-
-admin access for create,read,update,delete product
-checkout
-
+#checkout
+#user can only see their own order
+#admin access for create,read,update,delete product
 '''
